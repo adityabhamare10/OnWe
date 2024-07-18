@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_project1/home.dart';
-import 'package:flutter_project1/clubs.dart';
+import 'shared_pref_util.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -30,12 +29,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (response.statusCode == 200) {
+      print("Response Received: "+response.body);
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
       final String token = responseBody['token'];
-      print('Token: $token');
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
+      await SharedPreferencesUtil.saveToken(token);
+      String? storedToken = await SharedPreferencesUtil.getToken();
+      print('Token Retrieved: $storedToken');
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful!')));
 
@@ -49,6 +49,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _updateToken() async {
+    final String newToken = 'your_new_token';
+    await SharedPreferencesUtil.updateToken(newToken);
+    print('Token updated to: $newToken');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: Text('Go to Home Screen'),
             ),
+            ElevatedButton(
+              onPressed: _updateToken,
+              child: Text('Update Token'),
+            ),
           ],
         ),
       ),
-
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project1/explore.dart';
+import 'package:http/http.dart' as http;
 
 
 class ClubsScreen extends StatelessWidget {
@@ -13,18 +13,11 @@ class ClubsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ExploreScreen()),
-                );
-              },
-              child: Text('Go to Explore Screen'),
-            ),
           ],
         ),
       ),
+
+
     );
   }
 
