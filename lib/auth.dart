@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final String password = _passwordController.text;
 
     final response = await http.post(
-      Uri.parse('https://jersey-tracy-automation-closing.trycloudflare.com/mobileLogin'),
+      Uri.parse('https://contrary-tar-senators-kelkoo.trycloudflare.com/mobileLogin'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

@@ -22,7 +22,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       String? storedToken = await SharedPreferencesUtil.getToken();
       print('Token Retrieved: $storedToken');
       final response = await http.get(
-        Uri.parse('https://jersey-tracy-automation-closing.trycloudflare.com/top-posts'),
+        Uri.parse('https://contrary-tar-senators-kelkoo.trycloudflare.com/top-posts'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $storedToken',
