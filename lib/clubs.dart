@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'shared_pref_util.dart';
 
 class Club {
+
   final int id;
   final String clubName;
   final String coverImage;
@@ -38,10 +39,10 @@ class _ClubsScreenState extends State<ClubsScreen> {
 
   Future<void> _fetchClubs() async {
     final String? token = await SharedPreferencesUtil.getToken();
-    print('Token Retrieved: $token');
+    print('Stored Retrieved: $token');
 
     final response = await http.get(
-      Uri.parse('https://contrary-tar-senators-kelkoo.trycloudflare.com/myclubs'),
+      Uri.parse('https://impossible-wr-mortgage-kg.trycloudflare.com/mobile/myclubs'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token',

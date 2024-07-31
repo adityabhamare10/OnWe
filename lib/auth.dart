@@ -10,20 +10,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login() async {
-    final String username = _usernameController.text;
+    final String email = _emailController.text;
     final String password = _passwordController.text;
 
     final response = await http.post(
-      Uri.parse('https://contrary-tar-senators-kelkoo.trycloudflare.com/mobileLogin'),
+      Uri.parse('https://display-performing-screenshots-caps.trycloudflare.com/mobile_signin'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
-        'username': username,
+        'email': email,
         'password': password,
       }),
     );
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await SharedPreferencesUtil.saveToken(token);
       String? storedToken = await SharedPreferencesUtil.getToken();
-      print('Token Retrieved: $storedToken');
+      print('Stored Token Retrieved: $storedToken');
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful!')));
 
@@ -46,6 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${response.reasonPhrase}')));
+      print(response.reasonPhrase);
     }
   }
 
@@ -66,8 +67,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: <Widget>[
             TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: _passwordController,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project1/explore.dart';
 import 'package:flutter_project1/clubs.dart';
+import 'package:flutter_project1/home2.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -30,6 +31,15 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: Text('Go to Clubs Screen'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home2Screen()),
+                );
+              },
+              child: Text('Go to Home2 Screen'),
             ),
           ],
         ),

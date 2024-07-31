@@ -1,8 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'top-posts.dart';
 import 'shared_pref_util.dart';
+
+class Post {
+  final int id;
+  final List<String> media;
+
+  Post({
+    required this.id,
+    required this.media,
+  });
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      id: json['id'],
+      media: List<String>.from(json['media'] ?? []),
+    );
+  }
+}
+
+class Club {
+  final int clubId;
+  final String clubName;
+  final String coverImage;
+
+  Club({
+    required this.clubId,
+    required this.clubName,
+    required this.coverImage,
+  });
+
+  factory Club.fromJson(Map<String, dynamic> json) {
+    // Assuming coverImage is a list with one element
+    String coverImage = (json['coverImage'] as List<dynamic>)[0];
+    return Club(
+      clubId: json['clubId'],
+      clubName: json['clubName'],
+      coverImage: coverImage,
+    );
+  }
+}
 
 class ExploreScreen extends StatefulWidget {
   @override
@@ -11,6 +49,7 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   List<Post> posts = [];
+  List<Club> clubs = [];
   bool isLoading = false;
 
   Future<void> _loadData() async {
@@ -20,21 +59,37 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     try {
       String? storedToken = await SharedPreferencesUtil.getToken();
-      print('Token Retrieved: $storedToken');
-      final response = await http.get(
-        Uri.parse('https://contrary-tar-senators-kelkoo.trycloudflare.com/top-posts'),
+      print('Saved Token: $storedToken');
+
+      // Fetch top clubs
+      final clubsResponse = await http.get(
+        Uri.parse('https://display-performing-screenshots-caps.trycloudflare.com/mobile/topclubs'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $storedToken',
         },
       );
 
-      if (response.statusCode == 200) {
+      // Fetch top posts
+      final postsResponse = await http.get(
+        Uri.parse('https://display-performing-screenshots-caps.trycloudflare.com/mobile/top-posts'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $storedToken',
+        },
+      );
+
+      if (clubsResponse.statusCode == 200 && postsResponse.statusCode == 200) {
         // Log the response for debugging
-        print('Response body: ${response.body}');
-        final List<dynamic> responseData = jsonDecode(response.body);
+        print('Clubs Response : ${clubsResponse.body}');
+        print('Posts Response : ${postsResponse.body}');
+
+        final List<dynamic> clubsData = jsonDecode(clubsResponse.body);
+        final List<dynamic> postsData = jsonDecode(postsResponse.body);
+
         setState(() {
-          posts = responseData.map((data) => Post.fromJson(data)).toList();
+          clubs = clubsData.map((data) => Club.fromJson(data)).toList();
+          posts = postsData.map((data) => Post.fromJson(data)).toList();
           isLoading = false;
         });
       } else {
@@ -42,8 +97,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         setState(() {
           isLoading = false;
         });
-        print('Failed to load posts: ${response.reasonPhrase}');
-        throw Exception('Failed to load posts');
+        print('Failed to load data: ${clubsResponse.reasonPhrase}, ${postsResponse.reasonPhrase}');
+        throw Exception('Failed to load data');
       }
     } catch (e) {
       setState(() {
@@ -56,10 +111,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data after 2 seconds delay
-    Future.delayed(Duration(seconds: 0), () {
-      _loadData();
-    });
+    _loadData();
   }
 
   @override
@@ -72,32 +124,65 @@ class _ExploreScreenState extends State<ExploreScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
+            // Horizontal list of top clubs
+            if (clubs.isNotEmpty)
+              Container(
+                height: 100.0,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: clubs.length,
+                  itemBuilder: (context, index) {
+                    final club = clubs[index];
+                    return Container(
+                      width: 150.0,
+                      margin: EdgeInsets.only(right: 8.0),
+                      child: Column(
+                        children: [
+                          Image.memory(
+                            base64Decode(club.coverImage),
+                            width: 100,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
+                          Text(club.clubName),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            SizedBox(height: 16.0),
             // Vertical Grid of Images
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Two columns in the grid
+                  crossAxisCount: 3, // Three columns in the grid
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
                 ),
                 itemCount: posts.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: posts[index].avatar != null
-                        ? Image.memory(
-                      base64Decode(posts[index].avatar!),
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    )
-                        : Icon(
-                      Icons.image,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
+                  final post = posts[index];
+                  return Column(
+                    children: List.generate(post.media.length, (mediaIndex) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: post.media[mediaIndex] != null
+                            ? Image.memory(
+                          base64Decode(post.media[mediaIndex]),
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        )
+                            : Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                      );
+                    }),
                   );
                 },
               ),
